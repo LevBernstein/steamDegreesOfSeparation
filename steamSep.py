@@ -9,9 +9,8 @@ from collections import OrderedDict
 from operator import itemgetter
 from steam.steamid import SteamID
 from sys import exit as sysExit
-#import requests
 
-# Dependencies: steam, eventemitter, steamapi, steamladder api
+# Dependencies: steam, eventemitter, steamapi
 
 # Setup
 try:
@@ -22,29 +21,24 @@ try:
 except:
     print("Error! Could not read steamKey.txt!")
     sysExit(-1)
-try:
-    with open("ladderKey.txt", "r") as f: # in steamKey.txt, paste in your own Steam Web API Key
-        ladderKey = f.readline()
-        if "\n" in ladderKey:
-            ladderKey = ladderKey[:-1]
-except:
-    print("Error! Could not read ladderKey.txt!")
-    sysExit(-1)
-ladderURL = 'https://steamladder.com/api/v1'
 steamapi.core.APIConnection(api_key=myKey, validate_key=True)
-TARGET = 76561197986603983 # StrykeR's STEAM64 ID
+TARGET = 76561197986603983 # StrikeR's STEAM64 ID
 
 # Initial input
-#profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\n For example: https://steamcommunity.com/id/beardless\n")
-#profileURL = "https://steamcommunity.com/profiles/76561198954124241" # Placeholder for testing
-#profileURL = "https://steamcommunity.com/id/beardless" # Placeholder for testing
-profileURL = "https://steamcommunity.com/id/strykery" # Placeholder for testing
+profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\n For example: https://steamcommunity.com/profiles/76561197993787733 or https://steamcommunity.com/id/beardless\n")
+# Placeholders for testing:
+#profileURL = "https://steamcommunity.com/profiles/76561198954124241"
+#profileURL = "https://steamcommunity.com/id/beardless"
+#profileURL = "https://steamcommunity.com/id/strykery"
 #profileURL = "https://steamcommunity.com/id/St4ck"
+#profileURL = "https://steamcommunity.com/id/The_Cpt_FROGGY"
+#profileURL = "https://steamcommunity.com/profiles/76561197993787733"
+
 try:
     profileID = steam.steamid.from_url(profileURL)
     if profileID == None:
         raise Exception("Invalid URL!")
-    print(profileID)
+    #print(profileID)
 except:
     print("Invalid URL!")
     sysExit(-1)
@@ -62,17 +56,21 @@ def steamDegree(steamUser, friendsPosition):
     global usersPath
     global usersPathFriends
     if steamUser.steamid == TARGET:
-        print("Found StrykeR! Here's the full path to their profile: ")
+        usersPath.append(steamUser)
+        print("Found StrikeR! Here's the full path to their profile from " + str(initialUser) + ": ")
         print(usersPath)
+        print(str(initialUser) + "\'s StrikeR Number is " + str(len(usersPath) - 1) + ".")
         return steamUser
     if friendsPosition >= 5:
+        return None
+    if steamUser in usersPath:
         return None
     usersPath.append(steamUser)
     friends = steamUser.friends
     topFive = []
     if len(friends) == 0:
-            print("Empty friends list!")
-            return None
+        print("Empty friends list!")
+        return None
     users = sorted(friends, key = lambda user: userLevel(user), reverse=True)
     print(users)
     limit = 5  # to limit API calls, will only try the 5 highest level friends
@@ -83,28 +81,28 @@ def steamDegree(steamUser, friendsPosition):
         topFive = users
     print(topFive)
     usersPathFriends.append(topFive)
+    searching = True
+    count = 0
+    while searching:
+        try:
+            result = steamDegree(topFive[count], count) # currently very capable of running into infinite loops!
+        except steamapi.errors.APIUnauthorized:
+            print("Private profile, moving on...")
+            result = None
+        if result == None:
+            count += 1
+        else:
+            return result
+        if count >= 5:
+            searching = False
+    return None
 
 try:
-    steamDegree(steamapi.user.SteamUser(profileID), 0)
-except:
-    print("Error! Private profile!")
+    initialUser = steamapi.user.SteamUser(profileID)
+    steamDegree(initialUser, 0)
+except steamapi.errors.APIUnauthorized as err:
+    print("Error! Private profile! Your friends list must be publically accessible. (Error: " + str(err) + ")")
     sysExit(-1)
 
-'''
-def steamDegree(profileID, friendsPosition):
-    # friendsPosition repsresents how far down the user's highest level friends we have looked
-    r = requests.get(ladderURL + '/profile/' + str(profileID) + '/', headers={'Authorization': 'Token ' + ladderKey})
-    print("Get: " + r.url)
-    if r.status_code == 200:
-        print(r.json()['steam_stats']['friends'])
-        global usersPath
-        usersPath.append(profileID)
-    elif r.status_code == 401:
-        print("Unauthorized.")
-    elif r.status_code == 404:
-        print("User not found.")
-    elif r.status_code == 429:
-        print("Request rate limited. Max 1000 requests per hour.")
-
-steamDegree(profileID, 0)
-'''
+#initialUser = steamapi.user.SteamUser(profileID)
+#steamDegree(initialUser, 0)
