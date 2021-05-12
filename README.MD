@@ -1,6 +1,6 @@
 # Steam: How Far to the Top?
 
-A Python program that finds the degrees of separation between a given Steam user and StrikeR, one of the highest-level Steam users.
+A Python program that finds the degrees of separation between a given Steam user and the top 10 highest-level Steam users.
 
 Due to limitations of the Steam Web API, it can take quite a while to get friends information about a user with a sufficiently large (>50 people) friends list. Please be patient.
 

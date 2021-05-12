@@ -1,6 +1,6 @@
 # Steam: How Far to the Top?
 # Author: Lev Bernstein
-# This tool measures the degrees of separation between a given Steam user and the highest-level user on steam. That user is currently St4ck, but since their friends list is private, this tool will instead measure the distance to StrikeR.
+# This tool measures the degrees of separation between a given Steam user and the top 10 highest-level users on steam.
 # For any user with a sufficiently large friends list, it will take quite a while to find all their friends. Expect to wait a while if you have a friends list of 50+ people.
 
 import steam
@@ -21,10 +21,11 @@ except:
     print("Error! Could not read steamKey.txt!")
     sysExit(-1)
 steamapi.core.APIConnection(api_key=myKey, validate_key=True)
-TARGET = 76561197986603983 # StrikeR's STEAM64 ID
+TOPTEN = [76561198023414915, 76561197986603983, 76561198294650349, 76561198046160451, 76561197984432884, 76561198048165534, 76561198409565259, 76561198062673538, 76561198039386132, 76561197968423451]
+# If a member of the top 10 has their friends list set to private, you will likely not be able to form a path to them
 
 # Initial input
-profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\nFor example: https://steamcommunity.com/profiles/76561197993787733 or https://steamcommunity.com/id/beardless.\n")
+profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\nFor example: https://steamcommunity.com/profiles/76561197993787733.\n")
 # Placeholders for testing:
 #profileURL = "https://steamcommunity.com/profiles/76561198954124241"
 #profileURL = "https://steamcommunity.com/id/strykery"
@@ -52,23 +53,30 @@ def userLevel(user): # helper function for private profiles or random API errors
     except:
         return 0
 
-def steamDegree(steamUser, friendsPosition):
+def steamDegree(steamUser, friendsPosition): # users with extremely large friends lists will break the script
     global usersPath
     global usersPathFriends
     global exploredUsers
-    if steamUser.steamid == TARGET:
+    if steamUser.steamid in TOPTEN:
         usersPath.append(steamUser)
-        print("Found StrikeR! Here's the full path to their profile from " + str(initialUser) + ": ")
-        print(usersPath)
-        print(str(initialUser) + "\'s StrikeR Number is " + str(len(usersPath) - 1) + ".")
+        print("Found " + str(steamUser) + "! Here's the full path to their profile from " + str(initialUser) + ": ")
+        report = ""
+        for user in usersPath:
+            report += str(user) + ", "
+        report = report[:-2] + "."
+        print(report)
+        #print(usersPath)
+        print(str(initialUser) + "\'s " + str(steamUser) + " Number is " + str(len(usersPath) - 1) + ".")
         return steamUser
     if friendsPosition >= 5:
+        print("We've checked this person's top 5 friends, time to move on...")
         return None
+    print("Exploring " + str(steamUser) + "\'s profile...")
     if steamUser in usersPath or steamUser in exploredUsers:
+        print("We're in a loop! Exiting the loop and moving down the list...")
         return None
     usersPath.append(steamUser)
     exploredUsers.append(steamUser)
-    print("Currently exploring " + str(steamUser) + "'s profile...")
     friends = steamUser.friends
     topFive = []
     if len(friends) == 0:
@@ -88,7 +96,7 @@ def steamDegree(steamUser, friendsPosition):
     count = 0
     while searching:
         try:
-            result = steamDegree(topFive[count], count) # currently very capable of running into infinite loops!
+            result = steamDegree(topFive[count], count)
         except steamapi.errors.APIUnauthorized:
             print("Private profile, moving on...")
             result = None
@@ -105,10 +113,7 @@ try:
     print("Searching... this may take a while...")
     result = steamDegree(initialUser, 0)
     if result == None:
-        print("Unable to find a path to StrikeR. The necessary profiles might have private friends lists, or doing so would require looking beyond a user's 5 highest-level friends. Or the path could just not exist.")
+        print("Unable to find a path to the top 10. The necessary profiles might have private friends lists, or doing so would require looking beyond a user's 5 highest-level friends. Or the path could just not exist.")
 except steamapi.errors.APIUnauthorized as err:
-    print("Error! Private profile! Your friends list must be publically accessible. (Error: " + str(err) + ")")
+    print("Error! Private profile! Initial user's friends list must be publically accessible. (Error: " + str(err) + ")")
     sysExit(-1)
-
-#initialUser = steamapi.user.SteamUser(profileID)
-#steamDegree(initialUser, 0)
