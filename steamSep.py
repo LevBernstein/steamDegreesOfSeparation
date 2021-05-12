@@ -1,7 +1,7 @@
 # Steam: How Far to the Top?
 # Author: Lev Bernstein
 # This tool measures the degrees of separation between a given Steam user and the top 10 highest-level users on steam.
-# For any user with a sufficiently large friends list, it will take quite a while to find all their friends. Expect to wait a while if you have a friends list of 50+ people.
+# For any user with a sufficiently large friends list, it will take quite a while to find all their friends. Expect to wait a while if a user in the path has a friends list of 50+ people.
 
 import steam
 import steamapi # (https://github.com/LevBernstein/steamapi)
@@ -39,8 +39,8 @@ try:
     if profileID == None:
         raise Exception("Invalid URL!")
     #print(profileID)
-except:
-    print("Invalid URL!")
+except Exception as err:
+    print(str(err))
     sysExit(-1)
 
 usersPath = []
@@ -70,6 +70,7 @@ def steamDegree(steamUser, friendsPosition): # users with extremely large friend
         return steamUser
     if friendsPosition >= 5:
         print("We've checked this person's top 5 friends, time to move on...")
+        usersPath.pop()
         return None
     print("Exploring " + str(steamUser) + "\'s profile...")
     if steamUser in usersPath or steamUser in exploredUsers:
