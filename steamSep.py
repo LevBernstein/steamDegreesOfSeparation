@@ -24,14 +24,14 @@ steamapi.core.APIConnection(api_key=myKey, validate_key=True)
 TARGET = 76561197986603983 # StrikeR's STEAM64 ID
 
 # Initial input
-profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\n For example: https://steamcommunity.com/profiles/76561197993787733 or https://steamcommunity.com/id/beardless\n")
+profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\nFor example: https://steamcommunity.com/profiles/76561197993787733 or https://steamcommunity.com/id/beardless.\n")
 # Placeholders for testing:
 #profileURL = "https://steamcommunity.com/profiles/76561198954124241"
-#profileURL = "https://steamcommunity.com/id/beardless"
 #profileURL = "https://steamcommunity.com/id/strykery"
-#profileURL = "https://steamcommunity.com/id/St4ck"
 #profileURL = "https://steamcommunity.com/id/The_Cpt_FROGGY"
 #profileURL = "https://steamcommunity.com/profiles/76561197993787733"
+#profileURL = "https://steamcommunity.com/profiles/76561198061765150"
+#profileURL = "https://steamcommunity.com/id/beardless"
 
 try:
     profileID = steam.steamid.from_url(profileURL)
@@ -41,11 +41,12 @@ try:
 except:
     print("Invalid URL!")
     sysExit(-1)
-    
+
 usersPath = []
 usersPathFriends = []
+exploredUsers = []
 
-def userLevel(user): # helper function for private profiles; for a given private profile, level will be recorded as 0
+def userLevel(user): # helper function for private profiles or random API errors; for a given private or broken profile, level will be recorded as 0
     try:
         return user.level
     except:
@@ -54,6 +55,7 @@ def userLevel(user): # helper function for private profiles; for a given private
 def steamDegree(steamUser, friendsPosition):
     global usersPath
     global usersPathFriends
+    global exploredUsers
     if steamUser.steamid == TARGET:
         usersPath.append(steamUser)
         print("Found StrikeR! Here's the full path to their profile from " + str(initialUser) + ": ")
@@ -62,23 +64,25 @@ def steamDegree(steamUser, friendsPosition):
         return steamUser
     if friendsPosition >= 5:
         return None
-    if steamUser in usersPath:
+    if steamUser in usersPath or steamUser in exploredUsers:
         return None
     usersPath.append(steamUser)
+    exploredUsers.append(steamUser)
+    print("Currently exploring " + str(steamUser) + "'s profile...")
     friends = steamUser.friends
     topFive = []
     if len(friends) == 0:
         print("Empty friends list!")
         return None
     users = sorted(friends, key = lambda user: userLevel(user), reverse=True)
-    print(users)
+    #print(users)
     limit = 5  # to limit API calls, will only try the 5 highest level friends
     if len(users) > limit:
         for i in range(limit):
             topFive.append(users[i])
     else:
         topFive = users
-    print(topFive)
+    #print(topFive)
     usersPathFriends.append(topFive)
     searching = True
     count = 0
@@ -98,7 +102,10 @@ def steamDegree(steamUser, friendsPosition):
 
 try:
     initialUser = steamapi.user.SteamUser(profileID)
-    steamDegree(initialUser, 0)
+    print("Searching... this may take a while...")
+    result = steamDegree(initialUser, 0)
+    if result == None:
+        print("Unable to find a path to StrikeR. The necessary profiles might have private friends lists, or doing so would require looking beyond a user's 5 highest-level friends. Or the path could just not exist.")
 except steamapi.errors.APIUnauthorized as err:
     print("Error! Private profile! Your friends list must be publically accessible. (Error: " + str(err) + ")")
     sysExit(-1)
