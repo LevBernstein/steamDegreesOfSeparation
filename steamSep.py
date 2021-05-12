@@ -39,6 +39,7 @@ TARGET = 76561197986603983 # StrykeR's STEAM64 ID
 #profileURL = "https://steamcommunity.com/profiles/76561198954124241" # Placeholder for testing
 #profileURL = "https://steamcommunity.com/id/beardless" # Placeholder for testing
 profileURL = "https://steamcommunity.com/id/strykery" # Placeholder for testing
+#profileURL = "https://steamcommunity.com/id/St4ck"
 try:
     profileID = steam.steamid.from_url(profileURL)
     if profileID == None:
@@ -57,17 +58,15 @@ def userLevel(user): # helper function for private profiles; for a given private
     except:
         return 0
 
-
-def steamDegree(profileID, friendsPosition):
+def steamDegree(steamUser, friendsPosition):
     global usersPath
     global usersPathFriends
-    if int(profileID) == TARGET:
+    if steamUser.steamid == TARGET:
         print("Found StrykeR! Here's the full path to their profile: ")
         print(usersPath)
-        sysExit(0)
+        return steamUser
     if friendsPosition >= 5:
         return None
-    steamUser = steamapi.user.SteamUser(profileID)
     usersPath.append(steamUser)
     friends = steamUser.friends
     topFive = []
@@ -84,8 +83,12 @@ def steamDegree(profileID, friendsPosition):
         topFive = users
     print(topFive)
     usersPathFriends.append(topFive)
-    
-steamDegree(profileID, 0)
+
+try:
+    steamDegree(steamapi.user.SteamUser(profileID), 0)
+except:
+    print("Error! Private profile!")
+    sysExit(-1)
 
 '''
 def steamDegree(profileID, friendsPosition):
