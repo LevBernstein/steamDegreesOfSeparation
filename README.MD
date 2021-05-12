@@ -20,6 +20,38 @@ Due to limitations of the Steam Web API, it can take quite a while to get friend
 
 * My modified version of the steamapi wrapper (downloadable [here](https://github.com/LevBernstein/steamapi).)
 
+## Sample Output
+
+```
+Enter the URL for the steam profile you would like to check. URL must start with http.
+
+For example: https://steamcommunity.com/profiles/76561197993787733.
+
+https://steamcommunity.com/id/beardless
+
+Searching... this may take a while...
+
+Exploring Captain No-Beard's profile...
+
+Exploring The Red Crit's profile...
+
+Exploring mushroom's profile...
+
+Exploring Sovereign's profile...
+
+Exploring [Nutter] garnet.gg's profile...
+
+Private profile, moving on...
+
+Exploring Drush's profile...
+
+Found Ejay [bluestreak]! Here's the full path to their profile from Captain No-Beard: 
+    
+Captain No-Beard, The Red Crit, mushroom, Sovereign, [Nutter] garnet.gg, Drush, Ejay [bluestreak].
+
+Captain No-Beard's Ejay [bluestreak] Number is 6.
+```
+
 ## License
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
