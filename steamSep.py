@@ -105,7 +105,7 @@ def steamDegree(steamUser, friendsPosition): # users with extremely large friend
             count += 1
         else:
             return result
-        if count >= 5:
+        if count >= len(topFive):
             searching = False
     return None
 
