@@ -1,7 +1,7 @@
 # Steam: How Far to the Top?
 # Author: Lev Bernstein
 # This tool measures the degrees of separation between a given Steam user and the highest-level user on steam. That user is currently St4ck, but since their friends list is private, this tool will instead measure the distance to StrikeR.
-# For any user with a sufficiently large friends list, it will take quite a while to find all their friends. Expect to wait a while if you have a friends list of 100+ people.
+# For any user with a sufficiently large friends list, it will take quite a while to find all their friends. Expect to wait a while if you have a friends list of 50+ people.
 
 import steam
 import steamapi # (https://github.com/LevBernstein/steamapi)
@@ -32,11 +32,13 @@ except:
     sysExit(-1)
 ladderURL = 'https://steamladder.com/api/v1'
 steamapi.core.APIConnection(api_key=myKey, validate_key=True)
+TARGET = 76561197986603983 # StrykeR's STEAM64 ID
 
 # Initial input
 #profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\n For example: https://steamcommunity.com/id/beardless\n")
-profileURL = "https://steamcommunity.com/profiles/76561198954124241" # Placeholder for testing
-profileURL = "https://steamcommunity.com/id/beardless" # Placeholder for testing
+#profileURL = "https://steamcommunity.com/profiles/76561198954124241" # Placeholder for testing
+#profileURL = "https://steamcommunity.com/id/beardless" # Placeholder for testing
+profileURL = "https://steamcommunity.com/id/strykery" # Placeholder for testing
 try:
     profileID = steam.steamid.from_url(profileURL)
     if profileID == None:
@@ -57,15 +59,17 @@ def userLevel(user): # helper function for private profiles; for a given private
 
 
 def steamDegree(profileID, friendsPosition):
-    if friendsPosition >= 5:
-        return
     global usersPath
     global usersPathFriends
-    user = steamapi.user.SteamUser(profileID)
-    usersPath.append(user)
-    friends = user.friends
-    levels = []
-    diction = {}
+    if int(profileID) == TARGET:
+        print("Found StrykeR! Here's the full path to their profile: ")
+        print(usersPath)
+        sysExit(0)
+    if friendsPosition >= 5:
+        return None
+    steamUser = steamapi.user.SteamUser(profileID)
+    usersPath.append(steamUser)
+    friends = steamUser.friends
     topFive = []
     if len(friends) == 0:
             print("Empty friends list!")
