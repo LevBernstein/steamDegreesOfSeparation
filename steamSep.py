@@ -10,7 +10,6 @@ from operator import itemgetter
 from steam.steamid import SteamID
 from sys import exit as sysExit
 
-# Dependencies: steam, eventemitter, steamapi
 
 # Setup
 try:
