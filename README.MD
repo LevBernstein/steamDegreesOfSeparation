@@ -27,7 +27,7 @@ Enter the URL for the steam profile you would like to check. URL must start with
 
 For example: https://steamcommunity.com/profiles/76561197993787733.
 
-https://steamcommunity.com/id/beardless
+URL: https://steamcommunity.com/id/beardless
 
 Searching... this may take a while...
 
