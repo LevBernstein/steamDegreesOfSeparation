@@ -5,49 +5,48 @@
 
 import steam
 import steamapi # (https://github.com/LevBernstein/steamapi)
+from steam.steamid import SteamID
 from collections import OrderedDict
 from operator import itemgetter
-from steam.steamid import SteamID
 from sys import exit as sysExit
-
 
 # Setup
 try:
     with open("steamKey.txt", "r") as f: # in steamKey.txt, paste in your own Steam Web API Key
         myKey = f.readline()
-        if "\n" in myKey:
+        if myKey.endswith("\n"): # API doesn't handle line and carriage return characters well
+            myKey = myKey[:-1]
+        if myKey.endswith("\r"):
             myKey = myKey[:-1]
 except:
     print("Error! Could not read steamKey.txt!")
     sysExit(-1)
 steamapi.core.APIConnection(api_key=myKey, validate_key=True)
-TOPTEN = [76561198023414915, 76561197986603983, 76561198294650349, 76561198046160451, 76561197984432884, 76561198048165534, 76561198409565259, 76561198062673538, 76561198039386132, 76561197968423451]
-# If a member of the top 10 has their friends list set to private, you will likely not be able to form a path to them
-
-# Initial input
-profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\nFor example: https://steamcommunity.com/profiles/76561197993787733.\n")
-# Placeholders for testing:
-#profileURL = "https://steamcommunity.com/profiles/76561198954124241"
-#profileURL = "https://steamcommunity.com/id/strykery"
-#profileURL = "https://steamcommunity.com/id/The_Cpt_FROGGY"
-#profileURL = "https://steamcommunity.com/profiles/76561197993787733"
-#profileURL = "https://steamcommunity.com/profiles/76561198061765150"
-#profileURL = "https://steamcommunity.com/id/beardless"
-
-try:
-    profileID = steam.steamid.from_url(profileURL)
-    if profileID == None:
-        raise Exception("Invalid URL!")
-    #print(profileID)
-except Exception as err:
-    print(str(err))
-    sysExit(-1)
-
 usersPath = []
 usersPathFriends = []
 exploredUsers = []
+TOPTEN = [76561198023414915, 76561197986603983, 76561198294650349, 76561198046160451, 76561197984432884, 76561198048165534, 76561198409565259, 76561198062673538, 76561198039386132, 76561197968423451]
+# If a member of the top 10 has their friends list set to private, you will likely not be able to form a path to them
 
-def userLevel(user): # helper function for private profiles or random API errors; for a given private or broken profile, level will be recorded as 0
+def profInput():
+    profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\nFor example: https://steamcommunity.com/profiles/76561197993787733.\nURL: ")
+    # Placeholders for testing:
+    #profileURL = "https://steamcommunity.com/profiles/76561198954124241"
+    #profileURL = "https://steamcommunity.com/id/strykery"
+    #profileURL = "https://steamcommunity.com/id/The_Cpt_FROGGY"
+    #profileURL = "https://steamcommunity.com/profiles/76561197993787733"
+    #profileURL = "https://steamcommunity.com/profiles/76561198061765150"
+    #profileURL = "https://steamcommunity.com/id/beardless"
+    try:
+        profileID = steam.steamid.from_url(profileURL)
+        if profileID == None:
+            raise Exception("Invalid URL!")
+    except Exception as err:
+        print(str(err))
+        sysExit(-1)
+    return profileID
+
+def userLevel(user): # helper method for private profiles or random API errors; for a given private or broken profile, level will be recorded as 0
     try:
         return user.level
     except:
@@ -110,7 +109,7 @@ def steamDegree(steamUser, friendsPosition): # users with extremely large friend
     return None
 
 try:
-    initialUser = steamapi.user.SteamUser(profileID)
+    initialUser = steamapi.user.SteamUser(profInput())
     print("Searching... this may take a while...")
     result = steamDegree(initialUser, 0)
     if result == None:
