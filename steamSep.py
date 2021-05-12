@@ -1,12 +1,15 @@
+# Steam: How Far to the Top?
+# Author: Lev Bernstein
+# This tool measures the degrees of separation between a given Steam user and the highest-level user on steam. That user is currently St4ck, but since their friends list is private, this tool will instead measure the distance to StrikeR.
+# For any user with a sufficiently large friends list, it will take quite a while to find all their friends. Expect to wait a while if you have a friends list of 100+ people.
+
 import steam
 import steamapi # (https://github.com/LevBernstein/steamapi)
-#import requests
 from collections import OrderedDict
 from operator import itemgetter
-from steam.client import SteamClient
-from steam.webapi import WebAPI
 from steam.steamid import SteamID
 from sys import exit as sysExit
+#import requests
 
 # Dependencies: steam, eventemitter, steamapi, steamladder api
 
@@ -32,7 +35,8 @@ steamapi.core.APIConnection(api_key=myKey, validate_key=True)
 
 # Initial input
 #profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\n For example: https://steamcommunity.com/id/beardless\n")
-profileURL = "https://steamcommunity.com/profiles/76561198954124241"
+profileURL = "https://steamcommunity.com/profiles/76561198954124241" # Placeholder for testing
+profileURL = "https://steamcommunity.com/id/beardless" # Placeholder for testing
 try:
     profileID = steam.steamid.from_url(profileURL)
     if profileID == None:
@@ -41,41 +45,42 @@ try:
 except:
     print("Invalid URL!")
     sysExit(-1)
-
+    
 usersPath = []
 usersPathFriends = []
 
+def userLevel(user): # helper function for private profiles; for a given private profile, level will be recorded as 0
+    try:
+        return user.level
+    except:
+        return 0
+
+
 def steamDegree(profileID, friendsPosition):
+    if friendsPosition >= 5:
+        return
     global usersPath
     global usersPathFriends
     user = steamapi.user.SteamUser(profileID)
     usersPath.append(user)
     friends = user.friends
-    usersPathFriends.append(friends)
     levels = []
     diction = {}
     topFive = []
-
-    for friend in friends:
-        try:
-            levels.append(friend.level)
-        except:
-            levels.append(0)
-    for i in range(len(friends)):
-        diction[friends[i]] = levels[i]
-    sortedDict = OrderedDict(sorted(diction.items(), key = itemgetter(1), reverse=True))
-    #print(sortedDict)
-    if len(friends) != 0:
-        i = 0
-        for key in sortedDict.keys():
-            topFive.append(key)
-            i+=1
-            if i == 5: # to limit API calls, will only try the 5 highest from a friends list
-                break
+    if len(friends) == 0:
+            print("Empty friends list!")
+            return None
+    users = sorted(friends, key = lambda user: userLevel(user), reverse=True)
+    print(users)
+    limit = 5  # to limit API calls, will only try the 5 highest level friends
+    if len(users) > limit:
+        for i in range(limit):
+            topFive.append(users[i])
     else:
-        print("Empty friends list!")
+        topFive = users
     print(topFive)
-
+    usersPathFriends.append(topFive)
+    
 steamDegree(profileID, 0)
 
 '''
@@ -95,5 +100,4 @@ def steamDegree(profileID, friendsPosition):
         print("Request rate limited. Max 1000 requests per hour.")
 
 steamDegree(profileID, 0)
-
 '''
