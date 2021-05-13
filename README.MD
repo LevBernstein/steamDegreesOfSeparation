@@ -6,6 +6,10 @@ A Python program that finds the degrees of separation between a given Steam user
 
 Due to limitations of the Steam Web API, it can take quite a while to get friends information about a user with a sufficiently large (>50 people) friends list. Please be patient. In addition, note that this does not find the *optimal* path between two users, but rather the path between two users found by only visiting the highest-level friend of a given user.
 
+## How Does It Work?
+
+Starting with the initial user, the algorithm vists a user's highest-level friend, and keeps doing so until it reaches someone in the top 10, finds a private profile, hits a loop, or has otherwise explored the user's 5 highest-level friends. Essentially, this is a greedy, naive algorithm that functions similarly to depth-first search. I'm fairly confident it runs in O(n) time, where n is the number of users in the investigated component of the whole social network (or, in other words, n is the number of users in each isolated "island" of users). The worst case of the algorithm involves fully exploring every user in a component without ever making it to the top 10; that would be O(n) time. In terms of actual real-world runtime, the Steam Web API is quite slow; as far as I know, there is no way to load just the top 5 friends for a given profile. As such, a profile with 1600 friends will have to have every friend loaded by the API before it gives the algorithm any of the data.
+
 ## Installation
 
 1. Download the repository.
