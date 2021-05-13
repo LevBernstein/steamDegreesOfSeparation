@@ -37,7 +37,6 @@ def profInput():
     #profileURL = "https://steamcommunity.com/id/The_Cpt_FROGGY"
     #profileURL = "https://steamcommunity.com/profiles/76561197993787733"
     #profileURL = "https://steamcommunity.com/profiles/76561198061765150"
-    #profileURL = "https://steamcommunity.com/id/beardless"
     try:
         profileID = steam.steamid.from_url(profileURL)
         if profileID == None:
@@ -105,7 +104,8 @@ def steamDegree(steamUser, friendsPosition): # users with extremely large friend
         try:
             result = steamDegree(topFive[count], count)
         except steamapi.errors.APIUnauthorized:
-            print("Private profile, moving on...")
+            print("Private friends list or profile, moving on...")
+            usersPath.pop()
             result = None
         if result == None:
             count += 1
@@ -122,5 +122,5 @@ try:
     if result == None:
         print("Unable to find a path to the top 10. The necessary profiles might have private friends lists, or doing so would require looking beyond a user's 5 highest-level friends. Or the path could just not exist.")
 except steamapi.errors.APIUnauthorized:
-    print("Error! Private profile! Initial user's friends list must be publically accessible.")
+    print("Error! Private friends list or profile! Initial user's friends list must be publically accessible.")
     sysExit(-1)
