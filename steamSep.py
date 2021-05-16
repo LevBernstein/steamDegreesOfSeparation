@@ -72,13 +72,14 @@ def found(steamUser):
     print(str(initialUser) + "\'s " + str(steamUser) + " Number is " + str(len(usersPath) - 1) + ".")
     return steamUser
 
-def steamDegree(steamUser, friendsPosition): # users with extremely large friends lists will break the script
+def steamDegree(steamUser, friendsPosition): # users with extremely large friends lists have a small chance of breaking the script
+    # friendsPosition isn't strictly needed, but serves as a secondary method of ensuring we don't explore too far
     global usersPath
     global usersPathFriends
     global exploredUsers
     if steamUser.steamid in TOPTEN: # recursion base case 1; only ever reached if you try to run this on a user in the top 10. Otherwise, base case 2 will be the one to fire.
         return found(steamUser)
-    if friendsPosition >= 5:
+    if friendsPosition >= 5: # unlikely to ever fire, but included just in case
         print("We've checked this person's top 5 friends, time to move on...")
         usersPath.pop()
         return None
@@ -91,7 +92,7 @@ def steamDegree(steamUser, friendsPosition): # users with extremely large friend
     friends = steamUser.friends
     topFive = []
     if len(friends) == 0:
-        print("Empty friends list!")
+        print("Empty friends list! Moving back and down...") # theoretically impossible, but sometimes private profiles register as having 0 friends
         return None
     users = sorted(friends, key = lambda user: userLevel(user), reverse=True)
     #print(users)
@@ -119,6 +120,8 @@ def steamDegree(steamUser, friendsPosition): # users with extremely large friend
         else:
             return result
         if count >= len(topFive):
+            print("We've checked this person's top " + len(topFive) + " friends, time to move on...")
+            usersPath.pop()
             searching = False
     return None
 
