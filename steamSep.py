@@ -21,26 +21,33 @@ try:
 except:
     print("Error! Could not read steamKey.txt!")
     sysExit(-1)
-steamapi.core.APIConnection(api_key=myKey, validate_key=True)
+
+try:
+    steamapi.core.APIConnection(api_key=myKey, validate_key=True)
+except:
+    print("Error! Invalid API key!")
+    sysExit(-1)
+
 usersPath = []
 usersPathFriends = []
 exploredUsers = []
 LIMIT = 5 # to limit API calls, will only try the 5 highest level friends
 TOPTEN = [76561198023414915, 76561197986603983, 76561198294650349, 76561198046160451, 76561197984432884, 76561198048165534, 76561198409565259, 76561198062673538, 76561198039386132, 76561197968423451]
-# If a member of the top 10 has their friends list set to private, you might not be able to form a path to them
 
 def profInput():
     profileURL = input("Enter the URL for the steam profile you would like to check. URL must start with http.\nFor example: https://steamcommunity.com/profiles/76561197993787733.\nURL: ")
     # Placeholders for testing:
     #profileURL = "https://steamcommunity.com/profiles/76561198954124241"
-    #profileURL = "https://steamcommunity.com/id/strykery"
-    #profileURL = "https://steamcommunity.com/id/The_Cpt_FROGGY"
-    #profileURL = "https://steamcommunity.com/profiles/76561197993787733"
-    #profileURL = "https://steamcommunity.com/profiles/76561198061765150"
+    #profileURL = "https://steamcommunity.com/id/strykery" # in top 10
+    #profileURL = "https://steamcommunity.com/id/St4ck" # in top 10 but private friends list
+    #profileURL = "https://steamcommunity.com/id/The_Cpt_FROGGY" # one away from top 10
+    #profileURL = "https://steamcommunity.com/profiles/76561197993787733" # two away from top 10
+    #profileURL = "https://steamcommunity.com/profiles/76561198061765150" # three away from top 10
+    #profileURL = "https://steamcommunity.com/id/ah_" # lots of loops, good for testing that
     try:
         profileID = steam.steamid.from_url(profileURL)
         if profileID == None:
-            raise Exception("Invalid URL!")
+            raise Exception("Error! Invalid URL!")
     except Exception as err:
         print(str(err))
         sysExit(-1)
@@ -97,7 +104,7 @@ def steamDegree(steamUser, friendsPosition): # users with extremely large friend
     usersPathFriends.append(topFive)
     searching = True
     count = 0
-    for user in topFive: # base case 2; workaround to allow accesing profiles with one-way private friends lists
+    for user in topFive: # base case 2; workaround to allow accessing profiles with one-way private friends lists
         if user.steamid in TOPTEN:
             return found(user)
     while searching:
