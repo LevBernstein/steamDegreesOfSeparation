@@ -64,10 +64,7 @@ def found(steamUser, initialUser):
     global usersPath
     usersPath.append(steamUser)
     print("Found " + str(steamUser) + "! Here's the full path to their profile from " + str(initialUser) + ": ")
-    report = ""
-    for user in usersPath:
-        report += str(user) + ", "
-    report = report[:-2] + "."
+    report = (", ".join(str(user) for user in usersPath)) + "."
     print(report)
     #print(usersPath)
     print(str(initialUser) + "\'s " + str(steamUser) + " Number is " + str(len(usersPath) - 1) + ".")
