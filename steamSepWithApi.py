@@ -12,7 +12,6 @@ import steam
 import steamapi # (https://github.com/LevBernstein/steamapi)
 from steam.steamid import SteamID
 
-from collections import OrderedDict
 from typing import Optional
 
 

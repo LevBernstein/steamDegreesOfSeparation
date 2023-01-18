@@ -11,7 +11,6 @@ import steam
 from bs4 import BeautifulSoup
 from steam.steamid import SteamID
 
-from collections import OrderedDict
 from typing import Optional, List, Tuple, Union
 
 
@@ -33,10 +32,10 @@ def profInput() -> Union[str, int]:
 	try:
 		if steam.steamid.from_url(profileURL) is None:
 			raise Exception("Error! Invalid URL!")
-		return profileURL
 	except Exception as e:
 		print(e)
 		return -1
+	return profileURL
 
 
 def scrapeFriendsList(url: str) -> Union[List[str], int]:
@@ -88,14 +87,14 @@ def found(
 	return (url, userName)
 
 
-def steamDegree(url: str, initialUrl: str) -> str:
+def steamDegree(url: str, initialUrl: str) -> Optional[Tuple[str, str]]:
 	global usersPath, exploredUsers
 	if not url.endswith("/"):
 		url += "/"
 	userName = getUserName(url)
 	if url in topTen:
-		# recursion base case 1; only ever reached if you try to run this on a
-		# user in the top 10. Otherwise, base case 2 will be the one to fire.
+		# recursion base case 0; only ever reached if initial user is in the
+		# top 10. Otherwise, base case 1 will be the one to fire.
 		return found(url, userName, initialUrl)
 	print(f"Exploring {userName}'s profile...")
 	if (url, userName) in exploredUsers:
@@ -105,15 +104,14 @@ def steamDegree(url: str, initialUrl: str) -> str:
 	exploredUsers.append((url, userName))
 	topSix = scrapeFriendsList(url)
 	if len(topSix) == 0:
-		# Private or friendless profile
 		print("Empty friends list or private profile! Moving back and down...")
 		usersPath.pop()
 		return None
 	searching = True
 	count = 0
 	for user in topSix:
-		# base case 2
 		if user in topTen:
+			# base case 1: friend of currently examined user is in the top 10.
 			return found(url, userName, initialUser)
 	while searching:
 		result = steamDegree(topSix[count], initialUrl)
@@ -130,6 +128,7 @@ def steamDegree(url: str, initialUrl: str) -> str:
 			usersPath.pop()
 			searching = False
 	return None
+
 
 if __name__ == "__main__":
 	global usersPath, exploredUsers, topTen
