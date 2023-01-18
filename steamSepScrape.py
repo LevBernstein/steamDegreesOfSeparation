@@ -7,12 +7,10 @@ BeautifulSoup to scrape the steam website, resulting in a faster runtime.
 """
 
 import requests
-import steam
+import steam.steamid
 from bs4 import BeautifulSoup
-from steam.steamid import SteamID
 
 from typing import Optional, List, Tuple, Union
-
 
 # Test values:
 # https://steamcommunity.com/id/strykery # in top 10
@@ -38,7 +36,7 @@ def profInput() -> Union[str, int]:
 	return profileURL
 
 
-def scrapeFriendsList(url: str) -> Union[List[str], int]:
+def scrapeFriendsList(url: str) -> List[str]:
 	soup = BeautifulSoup(
 		requests.get(url).content.decode("utf-8"), "html.parser"
 	)
@@ -68,18 +66,14 @@ def getUserName(url: str) -> str:
 	).title.text[19:]
 
 
-def found(
-	url: str,
-	userName: str,
-	initialUrl: str
-) -> Tuple[str, str]:
+def found(url: str,userName: str, initialUrl: str) -> Tuple[str, str]:
 	global usersPath
 	usersPath.append((url, userName))
 	initialUserName = getUserName(initialUrl)
 	print(
 		f"Found {userName}! Here's the full path"
 		f" to their profile from {initialUserName}: ",
-		" -> ".join(user[1] for user in usersPath) + f".",
+		" -> ".join(user[1] for user in usersPath) + ".",
 		f"{initialUserName} is {len(usersPath) - 1}"
 		" users away from the top 10.",
 		sep="\n"
@@ -107,12 +101,12 @@ def steamDegree(url: str, initialUrl: str) -> Optional[Tuple[str, str]]:
 		print("Empty friends list or private profile! Moving back and down...")
 		usersPath.pop()
 		return None
-	searching = True
-	count = 0
 	for user in topSix:
 		if user in topTen:
 			# base case 1: friend of currently examined user is in the top 10.
 			return found(url, userName, initialUser)
+	searching = True
+	count = 0
 	while searching:
 		result = steamDegree(topSix[count], initialUrl)
 		if result is None:
