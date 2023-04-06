@@ -24,13 +24,13 @@ Starting with the initial user, the algorithm vists a user's highest-level frien
 
 * Python 3. To install, visit https://python.org/downloads/ and follow the instructions for your OS.
 
+* Steam for Python. To install, do `pip3 install -U steam`.
+
 For steamSepScrape.py:
 
 * Requests and Beautiful Soup. To install, do `pip3 install requests bs4`.
 
 For steamSepWithApi.py:
-
-* Steam for Python. To install, do `pip3 install -U steam`.
 
 * My modified version of the steamapi wrapper (downloadable [here](https://github.com/LevBernstein/steamapi).)
 
